@@ -1,2 +1,2 @@
 # FuelPriceTracker
-Screw the turkish economy
+WIP
