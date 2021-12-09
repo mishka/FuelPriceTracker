@@ -2,20 +2,27 @@ from requests import get
 
 HEADERS = {
     'content-type': 'application/json; charset=utf-8',
-    'user-agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1',
-    'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
+    'user-agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1'
 }
 
-class Opet:
+class gasoline:
     def __init__(self):
-        self.province_code = 934 # default (istanbul european side)
-        self.api_page = 'https://api.opet.com.tr/api/fuelprices/prices?ProvinceCode={}&IncludeAllProducts=true'
+        self.lpg = 'https://www.bp.com/bp-tr-pump-prices/api/PumpPrices?strCity=%C4%B0STANBUL%20(AVRUPA)'
+        self.gasoline = 'https://api.opet.com.tr/api/fuelprices/prices?ProvinceCode=934&IncludeAllProducts=true'        
 
     def get_prices(self):
-        return get(self.api_page.format(self.province_code), headers=HEADERS).json()
+        return get(self.gasoline, headers = HEADERS).json()
 
-    def prices(self):
-        response = self.get_prices()
-        gasoline = response[0]['prices'][0]['amount']
-        diesel = response[0]['prices'][2]['amount']
-        return [gasoline, diesel]
+    def get_lpg(self):
+        return get(self.lpg, headers = HEADERS).json()
+
+    def return_prices(self):
+        "Returns the prices with the order --> gasoline, diesel, lpg"
+        gas = self.get_prices()
+        lpg = self.get_lpg()
+
+        gasoline = gas[0]['prices'][0]['amount']
+        diesel = gas[0]['prices'][2]['amount']
+        lpg_price = lpg[0]['LpgPrice']
+
+        return [gasoline, diesel, float(lpg_price)]
