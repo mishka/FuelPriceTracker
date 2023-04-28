@@ -1,5 +1,3 @@
-# Fuel Price Tracker
-
 It's a library that retrieves the latest gasoline, diesel, and LPG prices from fuel station APIs and logs them to a CSV file. It can also generate a graph of the historical prices.
 
 ![alt text](https://github.com/mishka/FuelPriceTracker/blob/main/29-04-2023.png?raw=true)
