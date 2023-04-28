@@ -120,7 +120,7 @@ class gasgasgas:
 
         if previous_data == current_data[1:]: # minus the date
             print('Data is not changed. Skipping the write to CSV file.')
-            return
+            return 0
 
         # Write to the log file
         with open(self.log_file_path, 'a', newline='') as file:
@@ -140,6 +140,7 @@ class gasgasgas:
             })
 
         print('Data is changed. Writing to CSV file.')
+        return 1
 
 
     def generate_chart(self):
