@@ -31,10 +31,10 @@ class gas_prices:
         self.latest_prices = {}
 
         # Check if the gas_prices.csv file exists
-        file_exists = os.path.isfile(self.log_file_path)
+        self.file_exists = os.path.isfile(self.log_file_path)
 
         # If the file exists, read the latest prices from it
-        if file_exists:
+        if self.file_exists:
             with open(self.log_file_path, 'r') as file:
                 reader = csv.reader(file)
                 for row in reader:
@@ -46,7 +46,7 @@ class gas_prices:
                         }
 
         # If the file does not exist, try to get the prices from the parse_prices function
-        if not file_exists:
+        if not self.file_exists:
             self.latest_prices = self.parse_prices()
 
 
@@ -114,18 +114,9 @@ class gas_prices:
     
 
     def logging(self, prices):
-        # Check if the log file already exists
-        file_exists = os.path.isfile(self.log_file_path)
-
         # Check if the current data is different from the previous entry
         current_data = [datetime.now().strftime('%d/%m/%Y'), prices['gasoline'], prices['diesel'], prices['lpg']]
-        previous_data = None
-
-        if file_exists:
-            # get the latest row from the file
-            with open(self.log_file_path, 'r') as file:
-                reader = csv.reader(file)
-                previous_data = list(reader)[-1][1:]
+        previous_data = [self.latest_prices['gasoline'], self.latest_prices['diesel'], self.latest_prices['lpg']]
 
         if previous_data == current_data[1:]: # minus the date
             print('Data is not changed. Skipping the write to CSV file.')
@@ -137,7 +128,7 @@ class gas_prices:
             writer = csv.DictWriter(file, fieldnames=headers)
 
             # Write headers to the file if it doesn't exist
-            if not file_exists:
+            if not self.file_exists:
                 writer.writeheader()
 
             # Write the data to the file
@@ -154,23 +145,31 @@ class gas_prices:
     def generate_charts(self):
         # Load data from CSV file into a pandas DataFrame
         df = pd.read_csv(self.log_file_path, dayfirst=True, parse_dates=['Timestamp'], index_col='Timestamp')
-        
+
         # Create a line chart with all data on a single chart
-        ax = df.plot(figsize=(15, 12), linewidth=2, marker='o', markersize=8)
+        ax = df.plot(figsize=(15, 12), linewidth=4, marker='o', markersize=12)
 
         # Set chart title and axis labels
-        ax.set_title('Fuel Prices Over Time', fontsize=24, fontweight='bold')
-        ax.set_xlabel('Date', fontsize=18, fontweight='bold')
-        ax.set_ylabel('Price Per Liter (₺)', fontsize=18, fontweight='bold')
+        ax.set_title('Fuel Prices Over Time', fontsize=36, fontweight='bold')
+        ax.set_xlabel('Date', fontsize=36, fontweight='bold')
+        ax.set_ylabel('Price Per Liter (₺)', fontsize=36, fontweight='bold')
 
         # Customize tick labels and grid lines
-        ax.tick_params(axis='both', which='major', labelsize=14)
+        ax.tick_params(axis='both', which='major', labelsize=24)
+        ax.tick_params(axis='y', which='major', labelsize=24)
         ax.grid(axis='y', linestyle='--', alpha=0.7)
 
+        # Keep track of the last value for each fuel type
+        last_values = {fuel_type: None for fuel_type in df.columns}
+
         for i, line in enumerate(ax.lines):
+            fuel_type = df.columns[i]
             for x, y in zip(line.get_xdata(), line.get_ydata()):
-                label = f"₺{y:.2f}"
-                ax.annotate(label, xy=(x, y), xytext=(5, 5), textcoords="offset points", color=line.get_color(), fontsize=12)
+                # Only annotate the chart if the current value is different from the last value
+                if last_values[fuel_type] is None or y != last_values[fuel_type]:
+                    label = f"{y:.2f}"
+                    ax.annotate(label, xy=(x, y), xytext=(5, 5), textcoords="offset points", color=line.get_color(), fontsize=18)
+                    last_values[fuel_type] = y
 
         # Customize colors and styles for each line
         ax.lines[0].set_color('#FF9AA2')  # light pink for gasoline prices
@@ -189,15 +188,16 @@ class gas_prices:
         ax.lines[2].set_markeredgecolor('#1E90FF')  # dodger blue for LPG marker edges
 
         # Add legend and adjust its position and font size
-        ax.legend(['Gasoline', 'Diesel', 'LPG'], loc='best', fontsize=16)
+        ax.legend(['Gasoline', 'Diesel', 'LPG'], loc='center left', fontsize=32)
 
         # Add a background color to the chart
         ax.set_facecolor('#FDEFF2')
 
-        # Customize tick labels to display full dates
-        date_format = mdates.DateFormatter('%d %b %Y')  # format as "day month year"
-        ax.xaxis.set_major_formatter(date_format)
-        ax.xaxis.set_tick_params(rotation=0)
+        # Set x-axis tick labels to display precise dates of the data entries
+        xticks = df.index
+        xticklabels = [dt.strftime('%d %b %Y') for dt in xticks]
+        ax.set_xticks(xticks)                  # 90?
+        ax.set_xticklabels(xticklabels, rotation=45, ha='right')
 
         # Add grid lines to the price axis and customize their style
         ax.yaxis.grid(linestyle='--', alpha=0.7)
@@ -209,11 +209,15 @@ class gas_prices:
         # Show the DataFrame with two decimal places for the price values
         print(df.to_string(float_format='{:,.2f}'.format))
 
+        # Set custom figure size and dpi
+        fig = plt.gcf()
+        fig.set_size_inches(38.4, 21.6)  # 3840x2160 pixels
+
+        # Save the chart
+        chart_filename = f'{datetime.now().strftime("%d-%m-%Y")}.png'
+        plt.savefig(chart_filename, dpi=150)
+
         # Display the chart
-        plt.savefig('ehe.png')
-        plt.show()
+        # plt.show()
 
-
-lol = gas_prices()
-#lol.logging(lol.parse_prices())
-lol.generate_charts()
+        return chart_filename
