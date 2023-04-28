@@ -33,6 +33,7 @@ print(gas.latest_prices)  # Output: {'lpg': '10.51', 'gasoline': '20.37', 'diese
 
 # Log the latest prices to the CSV file using the "log" method
 # You will see print statements about whether the data is logged or not, depending on if the data has changed since the last run
+# It will return True if the csv file is edited, and False if not.
 gas.log(prices)
 
 # Generate a chart based on all the data in the CSV file using the "generate_char" method
