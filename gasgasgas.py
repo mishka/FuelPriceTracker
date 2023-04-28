@@ -9,7 +9,7 @@ from datetime import datetime
 from requests import get, post
 
 
-class gas_prices:
+class gasgasgas:
     def __init__(self):
         self.headers = {
             'content-type': 'application/json; charset=utf-8',
@@ -113,7 +113,7 @@ class gas_prices:
         return results
     
 
-    def logging(self, prices):
+    def log(self, prices):
         # Check if the current data is different from the previous entry
         current_data = [datetime.now().strftime('%d/%m/%Y'), prices['gasoline'], prices['diesel'], prices['lpg']]
         previous_data = [self.latest_prices['gasoline'], self.latest_prices['diesel'], self.latest_prices['lpg']]
@@ -142,7 +142,7 @@ class gas_prices:
         print('Data is changed. Writing to CSV file.')
 
 
-    def generate_charts(self):
+    def generate_chart(self):
         # Load data from CSV file into a pandas DataFrame
         df = pd.read_csv(self.log_file_path, dayfirst=True, parse_dates=['Timestamp'], index_col='Timestamp')
 
