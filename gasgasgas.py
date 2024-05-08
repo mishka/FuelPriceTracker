@@ -147,6 +147,9 @@ class gasgasgas:
         # Load data from CSV file into a pandas DataFrame
         df = pd.read_csv(self.log_file_path, dayfirst=True, parse_dates=['Timestamp'], index_col='Timestamp')
 
+        # Read only the last 15 rows from the DataFrame
+        df = df.iloc[-15:]
+        
         # Create a line chart with all data on a single chart
         ax = df.plot(figsize=(15, 12), linewidth=4, marker='o', markersize=12)
 
